@@ -1,16 +1,20 @@
-const express = require('express');
-const connectDB = require('./src/config/db'); // Import the database connection
-const app = require('./app'); // Import the app setup
+const http = require('http');
+const app = require('./app');
+const dotenv = require('dotenv');
 
-require('dotenv').config(); // Load environment variables from .env file
+// Load environment variables from .env file
+dotenv.config();
+
+// Import database connection
+const connectDB = require('./src/config/db');
 
 // Connect to the database
 connectDB();
 
-// Set the port from environment variable or default to 8080
 const PORT = process.env.PORT || 8080;
 
-// Start the server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+// Start server
+const server = http.createServer(app);
+server.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
