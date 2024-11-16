@@ -1,35 +1,44 @@
+
 const express = require("express");
 const router = express.Router();
 const { protect } = require("../middleware/authMiddleware");
 const {
   createBloodInventory,
   getAllBloodInventory,
+  getBloodInventoryByBloodBank,
+  softdeleteBloodInventory,
   updateBloodInventory,
-  deleteBloodInventory,
   getBloodInventoryByBloodGroup,
   getExpiringBloodInventory,
 } = require("../controllers/bloodInventoryController");
 
-// Route to create new blood inventory (admin or bloodbank only)
+// Route to create new blood inventory (only accessible by admin or bloodbank roles)
 router.post("/create", protect(["Admin", "bloodbank"]), createBloodInventory);
 
-// Route to get all blood inventory with pagination and filtering
-router.get("/all", protect(), getAllBloodInventory);
+// Route to get all blood inventory (accessible by all authenticated users)
+router.get("/all", protect, getAllBloodInventory);
 
-// Route to update blood inventory (admin or bloodbank only)
+// Route to get blood inventory by specific blood bank (accessible by all authenticated users)
+router.get("/bloodBank/:bloodBankId", protect, getBloodInventoryByBloodBank);
+
+// Route to update blood inventory (only accessible by admin or bloodbank roles)
 router.put(
   "/update/:id",
   protect(["Admin", "bloodbank"]),
   updateBloodInventory
 );
 
-// Route to soft delete blood inventory (admin only)
-router.delete("/delete/:id", protect(["Admin"]), deleteBloodInventory);
+// Route to soft delete blood inventory (only accessible by admin or bloodbank roles)
+router.delete(
+  "/delete/:id",
+  protect(["Admin", "bloodbank"]),
+  softdeleteBloodInventory
+);
 
-// Route to get blood inventory by blood group
-router.get("/bloodGroup/:bloodGroup", protect(), getBloodInventoryByBloodGroup);
+// Route to get blood inventory by blood group (accessible by all authenticated users)
+router.get("/bloodGroup/:bloodGroup", protect, getBloodInventoryByBloodGroup);
 
-// Route to get expiring blood inventory (admin or bloodbank only)
+// Route to get expiring blood inventory (only accessible by admin or bloodbank roles)
 router.get(
   "/expiring",
   protect(["Admin", "bloodbank"]),
