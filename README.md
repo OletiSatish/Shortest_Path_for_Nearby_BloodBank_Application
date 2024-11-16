@@ -60,7 +60,7 @@ Follow these steps to run the project locally.
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/blood-bank-management.git
+git clone https://github.com/OletiSatish/Shortest_Path_for_Nearby_BloodBank_Application.git
 cd blood-bank-management
 ```
 
@@ -76,14 +76,14 @@ cd blood-bank-management
    ```
 3. Create a `.env` file in the `frontend` directory and add the following (replace the values accordingly):
    ```
-   REACT_APP_API_URL=http://localhost:5000/api
+   REACT_APP_API_URL=http://localhost:8000/api
    ```
 
 4. Start the React development server:
    ```bash
    npm start
    ```
-   The frontend should now be running at [http://localhost:3000](http://localhost:3000).
+   The front end should now run at [http://localhost:3000](http://localhost:3000).
 
 ### 3. Backend Setup
 
@@ -109,7 +109,7 @@ cd blood-bank-management
    ```bash
    npm run dev
    ```
-   The backend server will now be running at [http://localhost:5000](http://localhost:5000).
+   The backend server will now run at [http://localhost:8000](http://localhost:8000).
 
 ### 4. Deployment (Optional)
 
