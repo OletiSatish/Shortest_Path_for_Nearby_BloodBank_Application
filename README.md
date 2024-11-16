@@ -61,7 +61,7 @@ Follow these steps to run the project locally.
 
 ```bash
 git clone https://github.com/OletiSatish/Shortest_Path_for_Nearby_BloodBank_Application.git
-cd blood-bank-management
+cd Shortest_Path_for_Nearby_BloodBank_Application
 ```
 
 ### 2. Frontend Setup
