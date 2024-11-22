@@ -1,157 +1,180 @@
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const User = require("../models/User");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
-// Register a new user
-const registerUser = async (req, res) => {
-  const { name, email, password, phone, bloodGroup, address, age, role } = req.body;
-  console.log(`[INFO] Attempting to register new user: ${email}`);
+const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_EXPIRY = process.env.JWT_EXPIRY;
 
+/**
+ * Register a new user
+ */
+exports.registerUser = async (req, res) => {
   try {
-    // Check if the user already exists
-    let user = await User.findOne({ email });
-    if (user) {
-      console.log(`[ERROR] Registration failed - user already exists: ${email}`);
-      return res.status(400).json({ message: 'User already exists' });
+    const { username, email, password, role } = req.body;
+
+    console.log("Attempting to register a new user.");
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      console.log(`Registration failed: User with email ${email} already exists.`);
+      return res.status(400).json({ message: "User already exists." });
     }
 
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
-    console.log(`[INFO] Password hashed successfully for: ${email}`);
 
-    // Create new user with role
-    user = new User({
-      name,
+    // Create new user
+    const newUser = new User({
+      username,
       email,
       password: hashedPassword,
-      phone,
-      bloodGroup,
-      address,
-      age,
       role,
     });
 
-    await user.save();
-    console.log(`[SUCCESS] User registered successfully: ${email}`);
-    res.status(201).json({ message: 'User registered successfully', user });
+    await newUser.save();
+    console.log(`User registered successfully: ${username} (${email}).`);
+
+    res.status(201).json({ message: "User registered successfully.", user: newUser });
   } catch (error) {
-    console.error(`[ERROR] Error registering user (${email}): ${error.message}`);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Error in registerUser:", error);
+    res.status(500).json({ message: "Server error.", error });
   }
 };
 
-// Login user and generate JWT token
-const loginUser = async (req, res) => {
-  const { email, password } = req.body;
-  console.log(`[INFO] User login attempt: ${email}`);
+/**
+ * Login user
+ */
 
+exports.loginUser = async (req, res) => {
   try {
+    const { email, password } = req.body;
+
+    console.log(`Login attempt for email: ${email}`);
+
+    // Check if user exists
     const user = await User.findOne({ email });
     if (!user) {
-      console.log(`[ERROR] Invalid login - user not found: ${email}`);
-      return res.status(400).json({ message: 'Invalid credentials' });
+      console.log(`Login failed: User with email ${email} not found.`);
+      return res.status(404).json({ message: "User not found." });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      console.log(`[ERROR] Invalid login - incorrect password for: ${email}`);
-      return res.status(400).json({ message: 'Invalid credentials' });
+    // Validate password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      console.log(`Login failed: Invalid password for email ${email}.`);
+      return res.status(401).json({ message: "Invalid credentials." });
     }
 
+    // Generate JWT
     const token = jwt.sign(
-      { id: user._id, role: user.role },
+      { id: user._id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: '1h' }
+      { expiresIn: process.env.JWT_EXPIRY }
     );
 
-    console.log(`[SUCCESS] Login successful for user: ${email}`);
-    res.status(200).json({ message: 'Login successful', token });
+    console.log(`Login successful for email: ${email}`);
+
+    res.status(200).json({
+      message: "Login successful.",
+      token,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+      },
+    });
   } catch (error) {
-    console.error(`[ERROR] Error during login for (${email}): ${error.message}`);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Error in loginUser:", error);
+    res.status(500).json({ message: "Server error.", error });
   }
 };
 
-// Get user by ID
-const getUserById = async (req, res) => {
-  const { id } = req.params;
-  console.log(`[INFO] Fetching user by ID: ${id}`);
 
+/**
+ * Get all users
+ */
+exports.getAllUsers = async (req, res) => {
   try {
-    const user = await User.findById(id);
-    if (!user) {
-      console.log(`[ERROR] User not found with ID: ${id}`);
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    console.log(`[SUCCESS] User fetched successfully: ${id}`);
-    res.status(200).json(user);
-  } catch (error) {
-    console.error(`[ERROR] Error fetching user by ID (${id}): ${error.message}`);
-    res.status(500).json({ message: 'Server error' });
-  }
-};
-
-// Update user details
-const updateUser = async (req, res) => {
-  const { id } = req.params;
-  const updates = req.body;
-  console.log(`[INFO] Updating user with ID: ${id}, Updates: ${JSON.stringify(updates)}`);
-
-  try {
-    const user = await User.findByIdAndUpdate(id, updates, { new: true });
-    if (!user) {
-      console.log(`[ERROR] User not found for update with ID: ${id}`);
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    console.log(`[SUCCESS] User updated successfully: ${id}`);
-    res.status(200).json({ message: 'User updated successfully', user });
-  } catch (error) {
-    console.error(`[ERROR] Error updating user (${id}): ${error.message}`);
-    res.status(500).json({ message: 'Server error' });
-  }
-};
-
-// Delete user by ID
-const deleteUser = async (req, res) => {
-  const { id } = req.params;
-  console.log(`[INFO] Attempting to delete user with ID: ${id}`);
-
-  try {
-    const user = await User.findByIdAndDelete(id);
-    if (!user) {
-      console.log(`[ERROR] User not found for deletion with ID: ${id}`);
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    console.log(`[SUCCESS] User deleted successfully: ${id}`);
-    res.status(200).json({ message: 'User deleted successfully' });
-  } catch (error) {
-    console.error(`[ERROR] Error deleting user (${id}): ${error.message}`);
-    res.status(500).json({ message: 'Server error' });
-  }
-};
-
-// Get all users (Admin only)
-const getAllUsers = async (req, res) => {
-  console.log(`[INFO] Fetching all users (Admin only)`);
-
-  try {
+    console.log("Fetching all users.");
     const users = await User.find();
-    console.log(`[SUCCESS] All users fetched successfully. Total users: ${users.length}`);
+    console.log(`Found ${users.length} users.`);
     res.status(200).json(users);
   } catch (error) {
-    console.error(`[ERROR] Error fetching all users: ${error.message}`);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Error in getAllUsers:", error);
+    res.status(500).json({ message: "Server error.", error });
   }
 };
 
-module.exports = {
-  registerUser,
-  loginUser,
-  getUserById,
-  updateUser,
-  deleteUser,
-  getAllUsers,
+/**
+ * Get user by ID
+ */
+exports.getUserById = async (req, res) => {
+  try {
+    console.log(`Fetching user by ID: ${req.params.id}`);
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      console.log(`User with ID ${req.params.id} not found.`);
+      return res.status(404).json({ message: "User not found." });
+    }
+    console.log(`User found: ${user.username}`);
+    res.status(200).json(user);
+  } catch (error) {
+    console.error("Error in getUserById:", error);
+    res.status(500).json({ message: "Server error.", error });
+  }
+};
+
+/**
+ * Update user
+ */
+exports.updateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { username, email, role } = req.body;
+
+    console.log(`Updating user with ID: ${id}`);
+
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      { username, email, role },
+      { new: true } // Return the updated document
+    );
+
+    if (!updatedUser) {
+      console.log(`Update failed: User with ID ${id} not found.`);
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    console.log(`User updated successfully: ${updatedUser.username} (${updatedUser.email}).`);
+    res.status(200).json({ message: "User updated successfully.", user: updatedUser });
+  } catch (error) {
+    console.error("Error in updateUser:", error);
+    res.status(500).json({ message: "Server error.", error });
+  }
+};
+
+/**
+ * Delete user
+ */
+exports.deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    console.log(`Attempting to delete user with ID: ${id}`);
+
+    const deletedUser = await User.findByIdAndDelete(id);
+
+    if (!deletedUser) {
+      console.log(`Deletion failed: User with ID ${id} not found.`);
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    console.log(`User deleted successfully: ${deletedUser.username} (${deletedUser.email}).`);
+    res.status(200).json({ message: "User deleted successfully." });
+  } catch (error) {
+    console.error("Error in deleteUser:", error);
+    res.status(500).json({ message: "Server error.", error });
+  }
 };

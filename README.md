@@ -83,7 +83,7 @@ cd Shortest_Path_for_Nearby_BloodBank_Application
    ```bash
    npm start
    ```
-   The front end should now run at [http://localhost:3000](http://localhost:3000).
+   The front end should now run at [http://localhost:5173](http://localhost:5173).
 
 ### 3. Backend Setup
 

@@ -1,32 +1,29 @@
 const express = require("express");
-const router = express.Router();
 const {
   createBloodBank,
   getAllBloodBanks,
   getBloodBankById,
   updateBloodBank,
   deleteBloodBank,
-} = require("../controllers/bloodbankController"); // Ensure this is correct
+} = require("../controllers/bloodbankController");
 
-const { protect } = require("../middleware/authMiddleware"); // Protect middleware
+const { authenticate, authorize } = require("../middleware/authMiddleware");
 
-// Route protection: Only admins can create, update, or delete blood banks
+const router = express.Router();
 
-// Create a new Blood Bank - Protected Route (Admin only)
-router.post("/create", protect(["Admin"]), createBloodBank);
-
-// Get all Blood Banks - Public Route (accessible to all)
+// Public route: Get all blood banks
 router.get("/", getAllBloodBanks);
 
-// Get a single Blood Bank by ID - Public Route (accessible to all)
+// Public route: Get a specific blood bank by ID
 router.get("/:id", getBloodBankById);
 
-// Update Blood Bank - Protected Route (Admin only)
-// You can add more roles to the array if you want to allow more users (e.g., Managers) to update
-router.put("/:id", protect(["Admin"]), updateBloodBank);
+// Protected route: Create a new blood bank (Admin only)
+router.post("/create", authenticate, authorize(["admin"]), createBloodBank);
 
-// Delete Blood Bank - Protected Route (Admin only)
-// You can add more roles to the array if needed
-router.delete("/:id", protect(["Admin"]), deleteBloodBank);
+// Protected route: Update a blood bank (Admin only)
+router.put("/:id", authenticate, authorize(["admin"]), updateBloodBank);
+
+// Protected route: Delete a blood bank (Admin only)
+router.delete("/:id", authenticate, authorize(["admin"]), deleteBloodBank);
 
 module.exports = router;

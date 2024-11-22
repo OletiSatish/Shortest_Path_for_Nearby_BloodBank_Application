@@ -96,9 +96,8 @@ function ReportsAndAnalytics() {
   return (
     <Box
       sx={{
-        padding: "40px", // Add consistent padding to the entire container
+        padding: "40px", // Add consistent padding to the entire container backgroundColor: "#fff",
         margin: "20px",
-        backgroundColor: "#f5f5f5",
         boxSizing: "border-box",
       }}
     >

@@ -1,70 +1,71 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
-const protect = (roles) => async (req, res, next) => {
+
+const authenticate = async (req, res, next) => {
   try {
-    // Get token from authorization header
+    // Extract the token from the Authorization header
     const token = req.headers.authorization?.split(" ")[1];
+
     if (!token) {
-      console.log("[ERROR] No token provided");
+      console.warn("Authentication failed: No token provided.");
       return res
         .status(401)
         .json({ message: "Not authorized, no token provided" });
     }
 
-    // Decode and verify the token
-    let decoded;
-    try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET);
-    } catch (error) {
-      console.log("[ERROR] Invalid token", error);
-      return res.status(401).json({ message: "Not authorized, invalid token" });
-    }
+    // Verify the token and decode its payload
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log("Token decoded successfully:", decoded);
 
-    // If no decoded data or invalid payload
-    if (!decoded) {
-      console.log("[ERROR] Invalid token payload");
-      return res
-        .status(401)
-        .json({ message: "Not authorized, token missing or invalid" });
-    }
-
-    if (!decoded.id) {
-      console.log("[ERROR] Missing user ID in token");
-      return res
-        .status(401)
-        .json({ message: "Not authorized, invalid token payload" });
-    }
-
-    // Find user by ID from decoded token
+    // Find the user based on the decoded ID
     const user = await User.findById(decoded.id);
     if (!user) {
-      console.log("[ERROR] User not found");
+      console.warn(`Authentication failed: User with ID ${decoded.id} not found.`);
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Attach user to the request object
+    // Attach the user object to the request for use in subsequent middlewares/routes
     req.user = user;
-
-    // Log the user details to verify the role (you can remove this in production)
-    console.log("[INFO] User:", req.user);
-
-    // Check if user role is authorized
-    if (roles && !roles.includes(req.user.role.toLowerCase())) {
-      console.log("[ERROR] Insufficient rights. User role:", req.user.role);
-      return res
-        .status(403)
-        .json({ message: "Access forbidden: insufficient rights" });
-    }
-
-    // Continue to the next middleware or route handler
+    console.log(`User authenticated successfully: ${user.username} (${user.role})`);
     next();
   } catch (error) {
-    console.error("[ERROR] Authorization failed:", error.message);
-    res
-      .status(401)
-      .json({ message: "Not authorized, token failed or expired" });
+    console.error("Authentication error:", error.message);
+    res.status(401).json({ message: "Not authorized, invalid token" });
   }
 };
 
-module.exports = { protect };
+/**
+ * Authorization middleware to check if the authenticated user has one of the required roles.
+ * The roles are passed as an array to the middleware.
+ */
+const authorize = (roles) => {
+  return (req, res, next) => {
+    try {
+      // Ensure the `authenticate` middleware has populated `req.user`
+      if (!req.user) {
+        console.error("Authorization error: User not authenticated.");
+        return res.status(500).json({ message: "User not authenticated" });
+      }
+
+      console.log(`User role: ${req.user.role}, Required roles: ${roles}`);
+      // Check if the user's role is included in the required roles
+      if (!roles.includes(req.user.role)) {
+        console.warn(
+          `Access forbidden: User role '${req.user.role}' is not authorized for this action.`
+        );
+        return res
+          .status(403)
+          .json({ message: "Access forbidden: insufficient rights" });
+      }
+
+      console.log("Authorization successful.");
+      next();
+    } catch (error) {
+      console.error("Authorization error:", error.message);
+      res.status(500).json({ message: "Server error during authorization" });
+    }
+  };
+};
+
+module.exports = { authenticate, authorize };

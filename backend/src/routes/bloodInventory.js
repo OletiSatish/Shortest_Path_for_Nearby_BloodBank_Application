@@ -1,48 +1,71 @@
-
 const express = require("express");
-const router = express.Router();
-const { protect } = require("../middleware/authMiddleware");
 const {
   createBloodInventory,
-  getAllBloodInventory,
-  getBloodInventoryByBloodBank,
-  softdeleteBloodInventory,
+  getInventoryByBloodBank,
+  getBloodInventoryById,
+  getAllInventories,
   updateBloodInventory,
-  getBloodInventoryByBloodGroup,
-  getExpiringBloodInventory,
+  deleteBloodInventory,
 } = require("../controllers/bloodInventoryController");
 
-// Route to create new blood inventory (only accessible by admin or bloodbank roles)
-router.post("/create", protect(["Admin", "bloodbank"]), createBloodInventory);
+const { authenticate, authorize } = require("../middleware/authMiddleware");
 
-// Route to get all blood inventory (accessible by all authenticated users)
-router.get("/all", protect, getAllBloodInventory);
+const router = express.Router();
 
-// Route to get blood inventory by specific blood bank (accessible by all authenticated users)
-router.get("/bloodBank/:bloodBankId", protect, getBloodInventoryByBloodBank);
+/**
+ * Protected Routes (Admin)
+ */
 
-// Route to update blood inventory (only accessible by admin or bloodbank roles)
+// Get all blood inventories across all blood banks
+router.get(
+  "/all",
+  authenticate,
+  authorize(["admin"]),
+  getAllInventories // New Route Handler
+);
+
+/**
+ * Protected Routes (Admin or Blood Bank)
+ */
+
+// Get all inventory items for a specific blood bank by blood bank ID
+router.get(
+  "/bloodbank/:bloodBankId",
+  authenticate,
+  authorize(["admin", "bloodbank"]),
+  getInventoryByBloodBank
+);
+
+// Get details of a specific inventory item by its ID
+router.get(
+  "/item/:id",
+  authenticate,
+  authorize(["admin", "bloodbank"]),
+  getBloodInventoryById
+);
+
+// Create a new blood inventory (restricted to Admin or Blood Bank roles)
+router.post(
+  "/create",
+  authenticate,
+  authorize(["admin", "bloodbank"]),
+  createBloodInventory
+);
+
+// Update an existing blood inventory item by ID (restricted to Admin or Blood Bank roles)
 router.put(
   "/update/:id",
-  protect(["Admin", "bloodbank"]),
+  authenticate,
+  authorize(["admin", "bloodbank"]),
   updateBloodInventory
 );
 
-// Route to soft delete blood inventory (only accessible by admin or bloodbank roles)
+// Delete a blood inventory item by ID (restricted to Admin or Blood Bank roles)
 router.delete(
   "/delete/:id",
-  protect(["Admin", "bloodbank"]),
-  softdeleteBloodInventory
-);
-
-// Route to get blood inventory by blood group (accessible by all authenticated users)
-router.get("/bloodGroup/:bloodGroup", protect, getBloodInventoryByBloodGroup);
-
-// Route to get expiring blood inventory (only accessible by admin or bloodbank roles)
-router.get(
-  "/expiring",
-  protect(["Admin", "bloodbank"]),
-  getExpiringBloodInventory
+  authenticate,
+  authorize(["admin", "bloodbank"]),
+  deleteBloodInventory
 );
 
 module.exports = router;
