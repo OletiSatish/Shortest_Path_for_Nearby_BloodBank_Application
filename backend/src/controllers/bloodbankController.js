@@ -1,124 +1,80 @@
 const BloodBank = require("../models/BloodBank");
 
-// Create a new Blood Bank
+// Create a new blood bank
 const createBloodBank = async (req, res) => {
-  const { name, email, address, location, phoneNumber, status } = req.body;
-  console.log(
-    `[INFO] Creating new Blood Bank with name: ${name}, email: ${email}`
-  );
-
-  // Validate required fields
-  if (!name || !email || !address || !location || !phoneNumber) {
-    return res
-      .status(400)
-      .json({
-        message:
-          "Please provide all required fields: name, email, address, location, phoneNumber",
-      });
-  }
-
   try {
-    const bloodBank = new BloodBank({
-      name,
-      email,
-      address,
-      location,
-      phoneNumber,
-      status,
-    });
-    await bloodBank.save();
-    console.log(`[INFO] Blood Bank created successfully: ${bloodBank._id}`);
-    res
-      .status(201)
-      .json({ message: "Blood Bank created successfully", bloodBank });
+    const bloodBank = await BloodBank.create(req.body);
+    console.log("Blood bank created successfully:", bloodBank);
+    res.status(201).json(bloodBank);
   } catch (error) {
-    console.error(`[ERROR] Error creating blood bank: ${error.message}`);
-    res.status(500).json({ message: "Server error" });
+    console.error("Error creating blood bank:", error.message);
+    res.status(500).json({ message: "Failed to create blood bank" });
   }
 };
 
-// Get all Blood Banks
+// Get all blood banks
 const getAllBloodBanks = async (req, res) => {
-  console.log("[INFO] Fetching all blood banks");
-
   try {
     const bloodBanks = await BloodBank.find();
-    console.log(`[INFO] Fetched ${bloodBanks.length} blood banks`);
+    console.log(`Fetched ${bloodBanks.length} blood bank(s) successfully.`);
     res.status(200).json(bloodBanks);
   } catch (error) {
-    console.error(`[ERROR] Error fetching all blood banks: ${error.message}`);
-    res.status(500).json({ message: "Server error" });
+    console.error("Error fetching blood banks:", error.message);
+    res.status(500).json({ message: "Failed to fetch blood banks" });
   }
 };
 
-// Get a single Blood Bank by ID
+// Get a single blood bank by ID
 const getBloodBankById = async (req, res) => {
-  const { id } = req.params;
-  console.log(`[INFO] Fetching blood bank with ID: ${id}`);
-
   try {
-    const bloodBank = await BloodBank.findById(id);
+    const bloodBank = await BloodBank.findById(req.params.id);
     if (!bloodBank) {
-      console.error(`[ERROR] Blood Bank with ID: ${id} not found`);
-      return res.status(404).json({ message: "Blood Bank not found" });
+      console.warn(`Blood bank with ID ${req.params.id} not found.`);
+      return res.status(404).json({ message: "Blood bank not found" });
     }
-    console.log(`[INFO] Fetched blood bank with ID: ${id}`);
+    console.log("Fetched blood bank successfully:", bloodBank);
     res.status(200).json(bloodBank);
   } catch (error) {
-    console.error(`[ERROR] Error fetching blood bank by ID: ${error.message}`);
-    res.status(500).json({ message: "Server error" });
+    console.error("Error fetching blood bank:", error.message);
+    res.status(500).json({ message: "Failed to fetch blood bank" });
   }
 };
 
-// Update Blood Bank
+// Update a blood bank by ID
 const updateBloodBank = async (req, res) => {
-  const { id } = req.params;
-  const { address, location } = req.body; // Only destructure the fields you want to update
-  console.log(`[INFO] Updating blood bank with ID: ${id}`);
-
   try {
-    const bloodBank = await BloodBank.findById(id);
+    const bloodBank = await BloodBank.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
     if (!bloodBank) {
-      console.error(`[ERROR] Blood Bank with ID: ${id} not found`);
-      return res.status(404).json({ message: "Blood Bank not found" });
+      console.warn(`Blood bank with ID ${req.params.id} not found for update.`);
+      return res.status(404).json({ message: "Blood bank not found" });
     }
-
-    // Only update the fields provided in the request body
-    if (address) {
-      bloodBank.address = address;
-    }
-    if (location) {
-      bloodBank.location = location;
-    }
-
-    // Save the updated blood bank information
-    await bloodBank.save();
-    console.log(`[INFO] Blood Bank with ID: ${id} updated successfully`);
-    res
-      .status(200)
-      .json({ message: "Blood Bank updated successfully", bloodBank });
+    console.log("Blood bank updated successfully:", bloodBank);
+    res.status(200).json(bloodBank);
   } catch (error) {
-    console.error(`[ERROR] Error updating blood bank: ${error.message}`);
-    res.status(500).json({ message: "Server error" });
+    console.error("Error updating blood bank:", error.message);
+    res.status(500).json({ message: "Failed to update blood bank" });
   }
 };
 
-// Delete Blood Bank
+// Delete a blood bank by ID
 const deleteBloodBank = async (req, res) => {
-  const { id } = req.params;
-  console.log(`[INFO] Deleting blood bank with ID: ${id}`);
-
   try {
-    const bloodBank = await BloodBank.findByIdAndDelete(id);
+    const bloodBank = await BloodBank.findByIdAndDelete(req.params.id);
     if (!bloodBank) {
-      console.error(`[ERROR] Blood Bank with ID: ${id} not found`);
-      return res.status(404).json({ message: "Blood Bank not found" });
+      console.warn(
+        `Blood bank with ID ${req.params.id} not found for deletion.`
+      );
+      return res.status(404).json({ message: "Blood bank not found" });
     }
-    console.log(`[INFO] Blood Bank with ID: ${id} deleted successfully`);
-    res.status(200).json({ message: "Blood Bank deleted successfully" });
+    console.log("Blood bank deleted successfully:", bloodBank);
+    res.status(200).json({ message: "Blood bank deleted successfully" });
   } catch (error) {
-    console.error(`[ERROR] Error deleting blood bank: ${error.message}`);
-    res.status(500).json({ message: "Server error" });
+    console.error("Error deleting blood bank:", error.message);
+    res.status(500).json({ message: "Failed to delete blood bank" });
   }
 };
 
