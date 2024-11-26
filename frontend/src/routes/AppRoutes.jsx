@@ -4,7 +4,7 @@ import BloodbankRoutes from "./BloodbankRoutes";
 function AppRoutes() {
   return (
     <div>
-      <BloodbankRoutes />;
+      <BloodbankRoutes />
       <AdminRoutes />
     </div>
   );
