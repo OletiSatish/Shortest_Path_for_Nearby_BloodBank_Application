@@ -1,9 +1,9 @@
 import { useState } from "react";
 import {
+  Box,
   Button,
   TextField,
   Typography,
-  Box,
   Card,
   CardContent,
   CardActions,
@@ -17,7 +17,9 @@ import {
   InputLabel,
   Snackbar,
   Alert,
+  LinearProgress,
 } from "@mui/material";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
 
 function Inventory() {
   const [inventory, setInventory] = useState([
@@ -36,6 +38,7 @@ function Inventory() {
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
 
   const bloodTypes = ["A+", "O-", "B+", "AB-", "O+", "A-", "B-", "AB+"];
+
 
   // Calculate total blood units
   const totalBloodUnits = inventory.reduce((acc, item) => acc + item.quantity, 0);
@@ -109,6 +112,15 @@ function Inventory() {
               display: "flex",
               flexDirection: "column",
               justifyContent: "space-between",
+              boxShadow: 3,
+              borderRadius: 2,
+              backgroundColor: item.quantity === 0 ? "#f44336" : "#fff",
+              color: item.quantity === 0 ? "#fff" : "#000",
+              "&:hover": {
+                transform: "scale(1.05)",
+                boxShadow: 6,
+              },
+              transition: "transform 0.3s, box-shadow 0.3s",
             }}
           >
             <CardContent>
@@ -116,8 +128,11 @@ function Inventory() {
                 {item.bloodType}
               </Typography>
               <Typography variant="body2" color="textSecondary">
-                Quantity: {item.quantity === 0 ? "0" : item.quantity}
+                Quantity: {item.quantity === 0 ? "Out of Stock" : item.quantity}
               </Typography>
+              {item.quantity === 0 && (
+                <LinearProgress sx={{ marginTop: 2 }} variant="determinate" value={0} />
+              )}
             </CardContent>
             <CardActions>
               <Button
@@ -125,6 +140,11 @@ function Inventory() {
                 color="error"
                 onClick={() => setInventory(inventory.filter((b) => b.id !== item.id))}
                 disabled={item.quantity === 0}
+                sx={{
+                  "&:hover": {
+                    backgroundColor: "#d32f2f",
+                  },
+                }}
               >
                 Remove
               </Button>
@@ -134,7 +154,20 @@ function Inventory() {
       </Box>
 
       <Box sx={{ textAlign: "center", mt: 3 }}>
-        <Button variant="contained" color="primary" onClick={handleDialogOpen}>
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<AddCircleIcon />}
+          onClick={handleDialogOpen}
+          sx={{
+            padding: "10px 20px",
+            borderRadius: "20px",
+            boxShadow: 3,
+            "&:hover": {
+              boxShadow: 6,
+            },
+          }}
+        >
           Add New Inventory
         </Button>
       </Box>

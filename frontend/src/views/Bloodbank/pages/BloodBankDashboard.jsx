@@ -1,115 +1,131 @@
-import { Box, Paper, Typography, Button, Card, CardContent } from '@mui/material';
-import { BarChart as BarChartIcon, Event as EventIcon, PersonAdd as PersonAddIcon } from '@mui/icons-material';
-import { Chart } from 'react-chartjs-2'; // Chart.js for charts (install chart.js and react-chartjs-2)
-import { createTheme } from '@mui/material/styles';
+import { Box, Card, CardContent, Typography } from "@mui/material";
+import PeopleIcon from "@mui/icons-material/People";
+import BloodtypeIcon from "@mui/icons-material/Bloodtype";
+import EventNoteIcon from "@mui/icons-material/EventNote";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
-const BloodBankDashboard = () => {
-  const theme = createTheme();
+// Chart components
+import LineChartComponent from "../../../components/BloodBank/charts/LineChartComponent";
+import BarChartComponent from "../../../components/BloodBank/charts/BarChartComponent";
+import AreaChartComponent from "../../../components/BloodBank/charts/AreaChartComponent";
 
-  // Sample data for the charts
-  const chartData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-    datasets: [
-      {
-        label: 'Blood Donated (in Liters)',
-        data: [50, 70, 90, 60, 80, 100],
-        borderColor: theme.palette.primary.main,
-        backgroundColor: theme.palette.primary.light,
-        tension: 0.4,
-        fill: true,
-      },
-    ],
-  };
-
-  const chartOptions = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: 'top',
-      },
-    },
-    scales: {
-      x: {
-        beginAtZero: true,
-      },
-    },
-  };
-
+const BloodbankDashboard = () => {
   return (
     <Box sx={{ padding: 3 }}>
-      <Typography variant="h4" gutterBottom>
+      <Typography variant="h4" sx={{ marginBottom: 2 }}>
         Blood Bank Dashboard
       </Typography>
 
-      {/* Cards Section */}
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-        {/* Card for Donor Count */}
-        <Paper sx={{ padding: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flex: 1 }}>
-          <Box>
-            <Typography variant="h6">Total Donors</Typography>
-            <Typography variant="h4">1200</Typography>
-          </Box>
-          <PersonAddIcon color="primary" fontSize="large" />
-        </Paper>
+      {/* Statistics Cards */}
+      <Box
+        sx={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 2,
+          marginBottom: 4,
+          justifyContent: "space-between",
+        }}
+      >
+        {/* Total Donors */}
+        <Card sx={{ flex: "1 1 18%", display: "flex", boxShadow: 3, borderRadius: 2 }}>
+          <CardContent sx={{ display: "flex", alignItems: "center", paddingTop: 2, paddingBottom: 1, width: "100%" }}>
+            <Box sx={{ marginRight: 2 }}>
+              <PeopleIcon color="primary" sx={{ fontSize: 40 }} />
+            </Box>
+            <Box>
+              <Typography variant="body2" sx={{ color: "text.secondary", marginBottom: 0.5 }}>
+                Total Donors
+              </Typography>
+              <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+                3,500
+              </Typography>
+            </Box>
+          </CardContent>
+        </Card>
 
-        {/* Card for Inventory */}
-        <Paper sx={{ padding: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flex: 1 }}>
-          <Box>
-            <Typography variant="h6">Blood Inventory</Typography>
-            <Typography variant="h4">1500 Liters</Typography>
-          </Box>
-          <BarChartIcon color="secondary" fontSize="large" />
-        </Paper>
+        {/* Total Blood Units */}
+        <Card sx={{ flex: "1 1 18%", display: "flex", boxShadow: 3, borderRadius: 2 }}>
+          <CardContent sx={{ display: "flex", alignItems: "center", paddingTop: 2, paddingBottom: 1, width: "100%" }}>
+            <Box sx={{ marginRight: 2 }}>
+              <BloodtypeIcon color="secondary" sx={{ fontSize: 40 }} />
+            </Box>
+            <Box>
+              <Typography variant="body2" sx={{ color: "text.secondary", marginBottom: 0.5 }}>
+                Total Blood Units
+              </Typography>
+              <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+                10,000 Units
+              </Typography>
+            </Box>
+          </CardContent>
+        </Card>
 
-        {/* Card for Expired Stock */}
-        <Paper sx={{ padding: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flex: 1 }}>
-          <Box>
-            <Typography variant="h6">Expired Blood Stock</Typography>
-            <Typography variant="h4">50 Liters</Typography>
-          </Box>
-          <EventIcon color="error" fontSize="large" />
-        </Paper>
+        {/* Total Events Organized */}
+        <Card sx={{ flex: "1 1 18%", display: "flex", boxShadow: 3, borderRadius: 2 }}>
+          <CardContent sx={{ display: "flex", alignItems: "center", paddingTop: 2, paddingBottom: 1, width: "100%" }}>
+            <Box sx={{ marginRight: 2 }}>
+              <EventNoteIcon color="success" sx={{ fontSize: 40 }} />
+            </Box>
+            <Box>
+              <Typography variant="body2" sx={{ color: "text.secondary", marginBottom: 0.5 }}>
+                Total Events Organized
+              </Typography>
+              <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+                25
+              </Typography>
+            </Box>
+          </CardContent>
+        </Card>
 
-        {/* Card for Upcoming Events */}
-        <Paper sx={{ padding: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flex: 1 }}>
-          <Box>
-            <Typography variant="h6">Upcoming Events</Typography>
-            <Typography variant="h4">5</Typography>
-          </Box>
-          <EventIcon color="primary" fontSize="large" />
-        </Paper>
+        {/* Blood Requests Fulfilled */}
+        <Card sx={{ flex: "1 1 18%", display: "flex", boxShadow: 3, borderRadius: 2 }}>
+          <CardContent sx={{ display: "flex", alignItems: "center", paddingTop: 2, paddingBottom: 1, width: "100%" }}>
+            <Box sx={{ marginRight: 2 }}>
+              <CheckCircleIcon color="info" sx={{ fontSize: 40 }} />
+            </Box>
+            <Box>
+              <Typography variant="body2" sx={{ color: "text.secondary", marginBottom: 0.5 }}>
+                Blood Requests Fulfilled
+              </Typography>
+              <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+                8,500
+              </Typography>
+            </Box>
+          </CardContent>
+        </Card>
       </Box>
 
-      {/* Blood Donation Chart */}
-      <Card sx={{ marginTop: 3 }}>
-        <CardContent>
-          <Typography variant="h6" gutterBottom>
-            Blood Donation Trend
-          </Typography>
-          <Box sx={{ position: 'relative', height:400, width: '100%' }}>
-            <Chart type="line" data={chartData} options={chartOptions} />
-          </Box>
-        </CardContent>
-      </Card>
+      {/* Charts Section */}
+      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
+        <Card sx={{ flex: "1 1 48%", boxShadow: 3, borderRadius: 2 }}>
+          <CardContent>
+            <Typography variant="h6" sx={{ marginBottom: 2 }}>
+              Blood Units Donation Trends (Monthly Overview)
+            </Typography>
+            <LineChartComponent />
+          </CardContent>
+        </Card>
 
-      {/* Quick Actions */}
-      <Card sx={{ marginTop: 3 }}>
-        <CardContent>
-          <Typography variant="h6" gutterBottom>
-            Quick Actions
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <Button variant="contained" color="primary" startIcon={<PersonAddIcon />} fullWidth>
-              Add Donor
-            </Button>
-            <Button variant="contained" color="secondary" startIcon={<EventIcon />} fullWidth>
-              Schedule Event
-            </Button>
-          </Box>
-        </CardContent>
-      </Card>
+        <Card sx={{ flex: "1 1 48%", boxShadow: 3, borderRadius: 2 }}>
+          <CardContent>
+            <Typography variant="h6" sx={{ marginBottom: 2 }}>
+              Blood Inventory Distribution (By Blood Type)
+            </Typography>
+            <BarChartComponent />
+          </CardContent>
+        </Card>
+
+        <Card sx={{ flex: "1 1 48%", boxShadow: 3, borderRadius: 2 }}>
+          <CardContent>
+            <Typography variant="h6" sx={{ marginBottom: 2 }}>
+              Donation Events (Yearly Overview)
+            </Typography>
+            <AreaChartComponent />
+          </CardContent>
+        </Card>
+      </Box>
     </Box>
   );
 };
 
-export default BloodBankDashboard;
+export default BloodbankDashboard;

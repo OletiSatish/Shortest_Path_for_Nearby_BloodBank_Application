@@ -1,64 +1,105 @@
-import { Box, Typography, Card, CardContent } from '@mui/material';
-import { Bar } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
-
-// Register necessary Chart.js components, including CategoryScale
-ChartJS.register(
-  CategoryScale,    // Register the CategoryScale (required for category-based x-axis)
-  LinearScale,      // Register the LinearScale (required for y-axis)
-  BarElement,       // Register the BarElement (required for Bar charts)
-  Title,            // Register the Title plugin
-  Tooltip,          // Register the Tooltip plugin
-  Legend            // Register the Legend plugin
-);
+import { Box, Card, CardContent, Typography } from "@mui/material";
+import LineChartComponent from "../../../components/Admin/charts/LineChartComponent";
+import BarChartComponent from "../../../components/Admin/charts/BarChartComponent";
+import PieChartComponent from "../../../components/Admin/charts/PieChartComponent";
+import Table  from "../../../components/Admin/Tables/TableComponent"; //
 
 const Reports = () => {
-  const reportData = {
-    labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-    datasets: [
-      {
-        label: 'Blood Donations (Units)',
-        data: [12, 19, 3, 5, 2, 3, 7],
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-        borderColor: 'rgba(75, 192, 192, 1)',
-        borderWidth: 1,
-      },
-    ],
-  };
-
-  const options = {
-    responsive: true,
-    plugins: {
-      title: {
-        display: true,
-        text: 'Blood Donations Over Time',
-      },
-    },
-    scales: {
-      x: {
-        beginAtZero: true,
-      },
-      y: {
-        beginAtZero: true,
-      },
-    },
-  };
-
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom>
-        Reports
+    <Box sx={{ padding: 3 }}>
+      <Typography variant="h4" sx={{ marginBottom: 2 }}>
+        Reports and Analytics
       </Typography>
 
-      {/* Card for the Chart */}
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Typography variant="h6" gutterBottom>
-            Blood Donations Report
-          </Typography>
-          <Bar data={reportData} options={options} />
-        </CardContent>
-      </Card>
+      {/* Overview Statistics */}
+      <Box sx={{ display: "flex", gap: 2, marginBottom: 4, justifyContent: "space-between" }}>
+        {/* Total Blood Requests */}
+        <Card sx={{ flex: "1 1 18%", display: "flex", boxShadow: 3, borderRadius: 2 }}>
+          <CardContent sx={{ display: "flex", alignItems: "center", paddingTop: 2, paddingBottom: 1, width: "100%" }}>
+            <Box sx={{ marginRight: 2 }}>
+              <Typography variant="body2" sx={{ color: "text.secondary", marginBottom: 0.5 }}>
+                Total Blood Requests
+              </Typography>
+              <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+                1,200
+              </Typography>
+            </Box>
+          </CardContent>
+        </Card>
+
+        {/* Total Blood Fulfilled */}
+        <Card sx={{ flex: "1 1 18%", display: "flex", boxShadow: 3, borderRadius: 2 }}>
+          <CardContent sx={{ display: "flex", alignItems: "center", paddingTop: 2, paddingBottom: 1, width: "100%" }}>
+            <Box sx={{ marginRight: 2 }}>
+              <Typography variant="body2" sx={{ color: "text.secondary", marginBottom: 0.5 }}>
+                Total Blood Fulfilled
+              </Typography>
+              <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+                1,000
+              </Typography>
+            </Box>
+          </CardContent>
+        </Card>
+
+        {/* Total Requests Pending */}
+        <Card sx={{ flex: "1 1 18%", display: "flex", boxShadow: 3, borderRadius: 2 }}>
+          <CardContent sx={{ display: "flex", alignItems: "center", paddingTop: 2, paddingBottom: 1, width: "100%" }}>
+            <Box sx={{ marginRight: 2 }}>
+              <Typography variant="body2" sx={{ color: "text.secondary", marginBottom: 0.5 }}>
+                Pending Requests
+              </Typography>
+              <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+                200
+              </Typography>
+            </Box>
+          </CardContent>
+        </Card>
+      </Box>
+
+      {/* Charts Section */}
+      <Box sx={{ marginBottom: 4 }}>
+        <Typography variant="h6" sx={{ marginBottom: 2 }}>
+          Performance Overview
+        </Typography>
+
+        {/* Line Chart for Requests Fulfilled */}
+        <Card sx={{ marginBottom: 4 }}>
+          <CardContent>
+            <Typography variant="h6" sx={{ marginBottom: 2 }}>
+              Requests Fulfilled (Monthly Overview)
+            </Typography>
+            <LineChartComponent />
+          </CardContent>
+        </Card>
+
+        {/* Bar Chart for Blood Stock */}
+        <Card sx={{ marginBottom: 4 }}>
+          <CardContent>
+            <Typography variant="h6" sx={{ marginBottom: 2 }}>
+              Blood Inventory Stock
+            </Typography>
+            <BarChartComponent />
+          </CardContent>
+        </Card>
+
+        {/* Optional Pie Chart for Blood Type Distribution */}
+        <Card sx={{ marginBottom: 4 }}>
+          <CardContent>
+            <Typography variant="h6" sx={{ marginBottom: 2 }}>
+              Blood Type Distribution
+            </Typography>
+            <PieChartComponent />
+          </CardContent>
+        </Card>
+      </Box>
+
+      {/* Data Table for Detailed Analytics */}
+      <Box>
+        <Typography variant="h6" sx={{ marginBottom: 2 }}>
+          Detailed Request Analysis
+        </Typography>
+        <Table /> {/* Your custom Table component for data */}
+      </Box>
     </Box>
   );
 };

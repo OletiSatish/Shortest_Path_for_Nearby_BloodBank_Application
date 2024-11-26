@@ -9,6 +9,10 @@ import BarChartIcon from '@mui/icons-material/BarChart';
 import SettingsIcon from '@mui/icons-material/Settings';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import EventIcon from '@mui/icons-material/Event';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import FeedbackIcon from '@mui/icons-material/Feedback';
+import MapIcon from '@mui/icons-material/Map';
+import ApprovalIcon from '@mui/icons-material/Approval';
 import { AppProvider } from '@toolpad/core/AppProvider';
 import { DashboardLayout } from '@toolpad/core/DashboardLayout';
 
@@ -19,6 +23,11 @@ import Reports from '../views/Admin/pages/Reports';
 import UserManagement from "../views/Admin/pages/UserManagement";
 import Settings from '../views/Admin/pages/Settings';
 import Events from '../views/Admin/pages/Events';
+import AdminHistory from "../views/Admin/pages/AdminHistory";
+import RequestManagement from '../views/Admin/pages/RequestManagement';
+import Navigation from '../views/Admin/pages/Navigation';
+import Notifications from '../views/Admin/pages/Notifications';
+import Feedback from '../views/Admin/pages/Feedback';
 
 // Navigation Configuration
 const NAVIGATION = [
@@ -26,7 +35,12 @@ const NAVIGATION = [
   { segment: 'users', title: 'User Management', icon: <GroupIcon /> },
   { segment: 'bloodbanks', title: 'Manage Blood Banks', icon: <ListAltIcon /> },
   { segment: 'events', title: 'Event Management', icon: <EventIcon /> },
+  { segment: 'requests', title: 'Request & Approval', icon: <ApprovalIcon /> },
+  { segment: 'navigation', title: 'Shortest Path', icon: <MapIcon /> },
+  { segment: 'notifications', title: 'Notifications', icon: <NotificationsIcon /> },
+  { segment: 'feedback', title: 'Feedback & Complaints', icon: <FeedbackIcon /> },
   { segment: 'reports', title: 'Reports & Analytics', icon: <BarChartIcon /> },
+  { segment: 'history', title: 'Admin History', icon: <ListAltIcon /> },
   { segment: 'settings', title: 'Settings', icon: <SettingsIcon /> },
 ];
 
@@ -47,7 +61,7 @@ const demoTheme = createTheme({
   },
 });
 
-// Demo Content Component (Switching pages based on route)
+// Page Content Switcher
 function DemoPageContent({ pathname }) {
   let pageContent;
 
@@ -64,8 +78,23 @@ function DemoPageContent({ pathname }) {
     case '/events':
       pageContent = <Events />;
       break;
+    case '/requests':
+      pageContent = <RequestManagement />;
+      break;
+    case '/navigation':
+      pageContent = <Navigation />;
+      break;
+    case '/notifications':
+      pageContent = <Notifications />;
+      break;
+    case '/feedback':
+      pageContent = <Feedback />;
+      break;
     case '/reports':
       pageContent = <Reports />;
+      break;
+    case '/history':
+      pageContent = <AdminHistory />;
       break;
     case '/settings':
       pageContent = <Settings />;
@@ -96,14 +125,14 @@ DemoPageContent.propTypes = {
   pathname: PropTypes.string.isRequired,
 };
 
-// Main Sidebar Component
+// Admin Sidebar Component
 function AdminSidebar(props) {
   const { window } = props;
 
-  // Simulated router state
+  // Router State Simulation
   const [pathname, setPathname] = React.useState('/dashboard');
 
-  // Ensure pathname is being updated
+  // Handle Navigation
   const handleNavigation = (path) => {
     setPathname(path);
   };
@@ -130,10 +159,9 @@ function AdminSidebar(props) {
       window={container}
     >
       <DashboardLayout defaultSidebarCollapsed={false}>
-        {/* Log the pathname to check if it's being updated */}
-        <Box sx={{ padding: 2 }}>
+        {/* <Box sx={{ padding: 2 }}>
           <Typography variant="h6">Current Path: {pathname}</Typography>
-        </Box>
+        </Box> */}
         <DemoPageContent pathname={pathname} />
       </DashboardLayout>
     </AppProvider>
