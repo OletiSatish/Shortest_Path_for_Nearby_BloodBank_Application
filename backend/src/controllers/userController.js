@@ -2,8 +2,9 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-const JWT_SECRET = process.env.JWT_SECRET;
-const JWT_EXPIRY = process.env.JWT_EXPIRY;
+// Constants
+const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
+const JWT_EXPIRY = process.env.JWT_EXPIRY || "1h";
 
 /**
  * Register a new user
@@ -13,6 +14,11 @@ exports.registerUser = async (req, res) => {
     const { username, email, password, role } = req.body;
 
     console.log("Attempting to register a new user.");
+
+    // Validate input
+    if (!username || !email || !password || !role) {
+      return res.status(400).json({ message: "All fields are required." });
+    }
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
@@ -29,7 +35,7 @@ exports.registerUser = async (req, res) => {
       username,
       email,
       password: hashedPassword,
-      role,
+      role: role.toLowerCase(),
     });
 
     await newUser.save();
@@ -38,19 +44,23 @@ exports.registerUser = async (req, res) => {
     res.status(201).json({ message: "User registered successfully.", user: newUser });
   } catch (error) {
     console.error("Error in registerUser:", error);
-    res.status(500).json({ message: "Server error.", error });
+    res.status(500).json({ message: "Server error.", error: error.message });
   }
 };
 
 /**
  * Login user
  */
-
 exports.loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
     console.log(`Login attempt for email: ${email}`);
+
+    // Validate input
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required." });
+    }
 
     // Check if user exists
     const user = await User.findOne({ email });
@@ -69,8 +79,8 @@ exports.loginUser = async (req, res) => {
     // Generate JWT
     const token = jwt.sign(
       { id: user._id, email: user.email, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRY }
+      JWT_SECRET,
+      { expiresIn: JWT_EXPIRY }
     );
 
     console.log(`Login successful for email: ${email}`);
@@ -78,6 +88,7 @@ exports.loginUser = async (req, res) => {
     res.status(200).json({
       message: "Login successful.",
       token,
+      role: user.role,
       user: {
         id: user._id,
         username: user.username,
@@ -87,10 +98,9 @@ exports.loginUser = async (req, res) => {
     });
   } catch (error) {
     console.error("Error in loginUser:", error);
-    res.status(500).json({ message: "Server error.", error });
+    res.status(500).json({ message: "Server error.", error: error.message });
   }
 };
-
 
 /**
  * Get all users
@@ -98,12 +108,12 @@ exports.loginUser = async (req, res) => {
 exports.getAllUsers = async (req, res) => {
   try {
     console.log("Fetching all users.");
-    const users = await User.find();
+    const users = await User.find({}, "-password"); // Exclude password from the response
     console.log(`Found ${users.length} users.`);
     res.status(200).json(users);
   } catch (error) {
     console.error("Error in getAllUsers:", error);
-    res.status(500).json({ message: "Server error.", error });
+    res.status(500).json({ message: "Server error.", error: error.message });
   }
 };
 
@@ -113,7 +123,7 @@ exports.getAllUsers = async (req, res) => {
 exports.getUserById = async (req, res) => {
   try {
     console.log(`Fetching user by ID: ${req.params.id}`);
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(req.params.id, "-password"); // Exclude password
     if (!user) {
       console.log(`User with ID ${req.params.id} not found.`);
       return res.status(404).json({ message: "User not found." });
@@ -122,7 +132,7 @@ exports.getUserById = async (req, res) => {
     res.status(200).json(user);
   } catch (error) {
     console.error("Error in getUserById:", error);
-    res.status(500).json({ message: "Server error.", error });
+    res.status(500).json({ message: "Server error.", error: error.message });
   }
 };
 
@@ -136,10 +146,15 @@ exports.updateUser = async (req, res) => {
 
     console.log(`Updating user with ID: ${id}`);
 
+    // Validate input
+    if (!username && !email && !role) {
+      return res.status(400).json({ message: "At least one field is required to update." });
+    }
+
     const updatedUser = await User.findByIdAndUpdate(
       id,
-      { username, email, role },
-      { new: true } // Return the updated document
+      { username, email, role: role.toLowerCase() },
+      { new: true, runValidators: true }
     );
 
     if (!updatedUser) {
@@ -151,7 +166,7 @@ exports.updateUser = async (req, res) => {
     res.status(200).json({ message: "User updated successfully.", user: updatedUser });
   } catch (error) {
     console.error("Error in updateUser:", error);
-    res.status(500).json({ message: "Server error.", error });
+    res.status(500).json({ message: "Server error.", error: error.message });
   }
 };
 
@@ -175,6 +190,6 @@ exports.deleteUser = async (req, res) => {
     res.status(200).json({ message: "User deleted successfully." });
   } catch (error) {
     console.error("Error in deleteUser:", error);
-    res.status(500).json({ message: "Server error.", error });
+    res.status(500).json({ message: "Server error.", error: error.message });
   }
 };

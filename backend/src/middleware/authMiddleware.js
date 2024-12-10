@@ -1,10 +1,12 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
-
+/**
+ * Authentication middleware to verify the JWT token.
+ */
 const authenticate = async (req, res, next) => {
   try {
-    // Extract the token from the Authorization header
+    // Extract the token from the Authorization header (Bearer <token>)
     const token = req.headers.authorization?.split(" ")[1];
 
     if (!token) {
@@ -28,6 +30,7 @@ const authenticate = async (req, res, next) => {
     // Attach the user object to the request for use in subsequent middlewares/routes
     req.user = user;
     console.log(`User authenticated successfully: ${user.username} (${user.role})`);
+
     next();
   } catch (error) {
     console.error("Authentication error:", error.message);
